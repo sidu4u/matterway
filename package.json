@@ -1,0 +1,10 @@
+{
+  "name": "platform-coding-challenge",
+  "description": "Matterway Platform coding challenge for Senior JavaScript Engineer.",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "node index.test.js"
+  }
+}
