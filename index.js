@@ -6,22 +6,23 @@
  * @returns {string[]}
  */
 
-const result = [];
+
 
 const getAllFilesExcept = (files, ignorePatterns) => {
+  const result = [];
   // TODO
   driver(files,ignorePatterns);
-  getNonIgnoredFiles(files);
+  getNonIgnoredFiles(files,result);
   return result;
 };
 
 
-const getNonIgnoredFiles = (root,prefix)=>{
+const getNonIgnoredFiles = (root,result,prefix)=>{
     if(root.constructor===Array){
-      root.forEach(ele => getNonIgnoredFiles(ele,"/"));
+      root.forEach(ele => getNonIgnoredFiles(ele,result,"/"));
     }
     else if(root.isDirectory){
-     root.files.forEach(ele => getNonIgnoredFiles(ele,`${prefix}${root.name}/`));
+     root.files.forEach(ele => getNonIgnoredFiles(ele,result,`${prefix}${root.name}/`));
     }
     else if(!root.ignore){
       result.push(`${prefix}${root.name}`);
@@ -68,6 +69,9 @@ const getNode = (root,path,index)=>{
   let fileName = path[index];
   let node;
   // let file = files.filter(ele=>ele.name===fileName)[0];
+  if(!root){
+    return false;
+  }
   if(index===path.length){
     return root;
   }
@@ -96,10 +100,10 @@ const driver=(files, ignorePatterns)=>{
       whiteList=false; 
     }
     node = getNode(files,paths.slice(1),0);
-    if(node.isDirectory){
+    if(node&&node.isDirectory){
       setAllFiles(node,whiteList?false:true);
     }
-    else{
+    else if (node){
       node.ignore = whiteList?false:true;
     }
 
@@ -123,12 +127,33 @@ const driver=(files, ignorePatterns)=>{
 // ));
 
 console.log( getAllFilesExcept(
-  [
-    {isDirectory: false, name: 'package.json'},
-    {isDirectory: false, name: 'index.js'},
-    {isDirectory: true, name: 'src', files: []}
-  ],
-  []
-))
+      [
+        {isDirectory: false, name: 'index.js'},
+        {
+          isDirectory: true,
+          name: 'src',
+          files: [
+            {isDirectory: false, name: 'index.js'},
+            {isDirectory: false, name: 'test.js'}
+          ]
+        },
+        {
+          isDirectory: true,
+          name: 'src (2)',
+          files: [
+            {isDirectory: false, name: 'a.js'},
+            {
+              isDirectory: true,
+              name: 'src',
+              files: [
+                {isDirectory: false, name: 'index2.js'},
+                {isDirectory: false, name: 'b.js'}
+              ]
+            }
+          ]
+        }
+      ],
+      ['!/src (2)/src/index2.js.js', '/src (2)', '!/src (2)/src/b.js', '/src'])
+    )
 
 module.exports.getAllFilesExcept = getAllFilesExcept;
